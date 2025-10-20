@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TEAM FLR</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white font-sans">
+
+  <!-- Header -->
+  <header class="flex flex-col md:flex-row items-center justify-between p-6 bg-gray-800 shadow-lg border-b-2 border-red-600">
+    <div class="flex items-center space-x-4">
+      <div class="h-14 w-14 bg-gray-700 rounded-full flex items-center justify-center text-xl font-bold text-red-600">FLR</div>
+      <h1 class="text-3xl font-bold text-red-600 tracking-wide">TEAM FLR</h1>
+    </div>
+    <nav class="mt-4 md:mt-0">
+      <ul class="flex flex-wrap gap-4">
+        <li><button onclick="showTab('Info')" class="tab-btn hover:text-red-500 transition-colors">Info</button></li>
+        <li><button onclick="showTab('Team')" class="tab-btn hover:text-red-500 transition-colors">Team</button></li>
+        <li><button onclick="showTab('Discord')" class="tab-btn hover:text-red-500 transition-colors">Discord</button></li>
+        <li><button onclick="showTab('Roster')" class="tab-btn hover:text-red-500 transition-colors">Roster</button></li>
+        <li><button onclick="showTab('Admin')" class="tab-btn hover:text-red-500 transition-colors">Admin Panel</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Main content -->
+  <main class="p-6 space-y-6">
+
+    <!-- Info Tab -->
+    <div id="Info" class="tab-content rounded-lg bg-gray-800 p-6 shadow-md">
+      <h2 class="text-3xl font-bold text-red-600 mb-4">Welcome to TEAM FLR!</h2>
+      <p>We’re thrilled to announce the launch of our new esports team. Stay tuned for roster updates, tournaments, and exclusive content!</p>
+    </div>
+
+    <!-- Team Tab -->
+    <div id="Team" class="tab-content hidden rounded-lg bg-gray-800 p-6 shadow-md">
+      <h2 class="text-3xl font-bold text-red-600 mb-4">About Our Team</h2>
+      <p>TEAM FLR is a competitive esports team focused on skill, teamwork, and dominating the scene.</p>
+    </div>
+
+    <!-- Discord Tab -->
+    <div id="Discord" class="tab-content hidden rounded-lg bg-gray-800 p-6 shadow-md">
+      <h2 class="text-3xl font-bold text-red-600 mb-4">Join our Discord!</h2>
+      <a href="https://discord.gg/gVkPGQN9HC" target="_blank" class="underline hover:text-red-500 transition-colors">Click here to join TEAM FLR Discord</a>
+    </div>
+
+    <!-- Roster Tab -->
+    <div id="Roster" class="tab-content hidden rounded-lg bg-gray-800 p-6 shadow-md">
+      <h2 class="text-3xl font-bold text-red-600 mb-4">Team Roster</h2>
+      <ul id="player-list" class="list-disc pl-5 space-y-1"></ul>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="Admin" class="tab-content hidden rounded-lg bg-gray-800 p-6 shadow-md">
+      <h2 class="text-3xl font-bold text-red-600 mb-4">Admin Panel</h2>
+
+      <!-- Login -->
+      <div id="admin-login" class="space-y-2">
+        <input type="text" id="admin-username" placeholder="Username" class="p-2 rounded w-full text-black focus:ring-2 focus:ring-red-600">
+        <input type="password" id="admin-password" placeholder="Password" class="p-2 rounded w-full text-black focus:ring-2 focus:ring-red-600">
+        <button onclick="adminLogin()" class="bg-red-600 px-4 py-2 rounded hover:bg-red-500 transition-colors w-full">Login</button>
+      </div>
+
+      <!-- Controls -->
+      <div id="admin-controls" class="hidden mt-4 space-y-2">
+        <input type="text" id="player-name" placeholder="Player Name" class="p-2 rounded w-full text-black focus:ring-2 focus:ring-red-600">
+        <button onclick="addPlayer()" class="bg-red-600 px-4 py-2 rounded hover:bg-red-500 transition-colors w-full">Add Player</button>
+        <ul id="admin-player-list" class="list-disc pl-5 space-y-1"></ul>
+      </div>
+    </div>
+  </main>
+
+  <!-- Scripts -->
+  <script>
+    // Tabs
+    function showTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.add('hidden'));
+      document.getElementById(tab).classList.remove('hidden');
+    }
+
+    // Admin login
+    const ADMIN_USER = 'FLR';
+    const ADMIN_PASS = 'TEAMAOISOG';
+
+    function adminLogin() {
+      const user = document.getElementById('admin-username').value;
+      const pass = document.getElementById('admin-password').value;
+
+      if(user === ADMIN_USER && pass === ADMIN_PASS) {
+        document.getElementById('admin-login').classList.add('hidden');
+        document.getElementById('admin-controls').classList.remove('hidden');
+        loadPlayers();
+      } else {
+        alert('Invalid credentials!');
+      }
+    }
+
+    // Roster management
+    function loadPlayers() {
+      const players = JSON.parse(localStorage.getItem('flr-roster') || '[]');
+      const list = document.getElementById('player-list');
+      const adminList = document.getElementById('admin-player-list');
+      list.innerHTML = '';
+      adminList.innerHTML = '';
+
+      players.forEach((p, i) => {
+        const li = document.createElement('li');
+        li.textContent = p;
+        list.appendChild(li);
+
+        const liAdmin = document.createElement('li');
+        liAdmin.textContent = p + ' ';
+        const btn = document.createElement('button');
+        btn.textContent = 'Remove';
+        btn.className = 'ml-2 bg-red-600 px-2 rounded hover:bg-red-500 transition-colors';
+        btn.onclick = () => removePlayer(i);
+        liAdmin.appendChild(btn);
+        adminList.appendChild(liAdmin);
+      });
+    }
+
+    function addPlayer() {
+      const name = document.getElementById('player-name').value.trim();
+      if(!name) return;
+
+      const players = JSON.parse(localStorage.getItem('flr-roster') || '[]');
+      players.push(name);
+      localStorage.setItem('flr-roster', JSON.stringify(players));
+      document.getElementById('player-name').value = '';
+      loadPlayers();
+    }
+
+    function removePlayer(index) {
+      const players = JSON.parse(localStorage.getItem('flr-roster') || '[]');
+      players.splice(index, 1);
+      localStorage.setItem('flr-roster', JSON.stringify(players));
+      loadPlayers();
+    }
+
+    // Initialize
+    showTab('Info');
+    loadPlayers();
+  </script>
+
+</body>
+</html>
